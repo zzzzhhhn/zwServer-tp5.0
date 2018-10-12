@@ -23,10 +23,17 @@ class Menu extends BaseController
 	 */
 	public function getMenu()
 	{
-		$menus = menuModel::getMenu();
+		$cache = cache('menus');
+		if (!$cache) {
+			$menus = menuModel::getMenu();
 
-		if (!$menus) {
-			throw new MenuException();
+			if (!$menus) {
+				throw new MenuException();
+			} else {
+				cache('menus', $menus, 3600);
+			}
+		} else {
+			$menus = $cache;
 		}
 		return $menus;
 	}

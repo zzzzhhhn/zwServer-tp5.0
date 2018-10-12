@@ -17,6 +17,6 @@ class BaseController extends Controller
 	public function __construct(Request $request = null)
 	{
 		parent::__construct($request);
-		Hook::listen('response_send');
+//		Hook::listen('response_send');
 	}
 }

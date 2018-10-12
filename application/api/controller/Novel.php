@@ -25,26 +25,32 @@ class Novel extends BaseController
 
 	/**
 	 * 获取小说信息
-	 * @param $id
-	 * @return array|null|\PDOStatement|string|\think\Model
 	 * @throws NovelException
+	 * @throws SuccessMessage
 	 * @throws \app\lib\exception\ParameterException
 	 * @throws \think\db\exception\DataNotFoundException
 	 * @throws \think\db\exception\ModelNotFoundException
 	 * @throws \think\exception\DbException
-	 * @route('api/novel/:id')
 	 */
 	public function getNovel()
 	{
 		(new IDValidate())->doCheck();
 
-		$novel = NovelModel::getNovelbyMenuId();
+		$cache = cache('novel'.request()->param()['id']);
+
+		if ($cache) {
+			$novel = $cache;
+		} else {
+			$novel = NovelModel::getNovelbyMenuId();
+			cache('novel'.request()->param()['id'], $novel, 3600);
+		}
 
 		if (!$novel) {
 			throw new NovelException();
 		} else {
 			throw new SuccessMessage(['data' => $novel]);
 		}
+
 	}
 
 	/**
@@ -56,7 +62,16 @@ class Novel extends BaseController
 	public function getCatalogsByNovelId()
 {
 	(new IDValidate())->doCheck();
-	$catalogs = Catalog::getCatalogsByNovelId();
+
+	$cache = cache('catalogs'.request()->param()['id']);
+
+	if ($cache) {
+		$catalogs = $cache;
+	} else {
+		$catalogs = Catalog::getCatalogsByNovelId();
+		cache('catalogs'.request()->param()['id'], $catalogs, 3600);
+	}
+
 
 	if (!$catalogs) {
 		throw new NovelException();
@@ -65,11 +80,11 @@ class Novel extends BaseController
 	}
 }
 
+
 	/**
 	 * 获取章节内容
-	 * @param $id
-	 * @return array|null|\PDOStatement|string|\think\Model
 	 * @throws ChapterException
+	 * @throws SuccessMessage
 	 * @throws \app\lib\exception\ParameterException
 	 * @route('api/chapter/:id')
 	 */
@@ -77,8 +92,14 @@ class Novel extends BaseController
 	{
 		(new IDValidate())->doCheck();
 
-		$chapter = Chapter::getChapterByCatalog();
+		$cache = cache('chapter'.request()->param()['id']);
 
+		if ($cache) {
+			$chapter = $cache;
+		} else {
+			$chapter = Chapter::getChapterByCatalog();
+			cache('chapter'.request()->param()['id'], $chapter, 3600);
+		}
 		if (!$chapter) {
 			throw new ChapterException();
 		} else {
